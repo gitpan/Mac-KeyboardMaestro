@@ -13,7 +13,7 @@ our @EXPORT_OK;
 use Mac::AppleScript qw(RunAppleScript);
 use Carp qw(croak);
 
-our $VERSION = "1.00";
+our $VERSION = "1.01";
 
 =head1 NAME
 
@@ -46,7 +46,9 @@ values as AppleScript by mistake.
 
 =head2 Functions
 
-These functions can be imported, or you can use them fully qualified.
+These functions can be imported, or you can use them fully qualified.  All
+functions throw exceptions if the AppleScript interface to Keyboard Maestro
+returns an error.
 
 =over
 
@@ -54,8 +56,7 @@ These functions can be imported, or you can use them fully qualified.
 
 =item km_macro $macro_uuid
 
-Execute the named macro / macro with the passed uuid.  Returns nothing.  Throws
-and exception if there's a problem.
+Execute the named macro / macro with the passed uuid.  Returns an empty list.
 
 =cut
 
@@ -86,6 +87,14 @@ sub _escaped($) {
   return '"' . $var . '"'
 }
 
+sub _varname($) {
+  my $var = shift;
+  unless ($var =~ /\A [A-Za-z] [A-Za-z0-9_ ]* \z/x) {
+    croak "Invalid Keyboard Maestro variable name '$var'";
+  }
+  return _escaped $var;
+}
+
 sub km_macro($) { _ras <<"APPLESCRIPT"; return }
   tell application "Keyboard Maestro Engine"
      do script @{[ _escaped shift ]}
@@ -96,14 +105,14 @@ push @EXPORT_OK, 'km_macro';
 
 =item km_set $varname, $value
 
-Sets the value of the corrisponding Keyboard Macro variable.  C<$value> will
-be automatically stringified.
+Sets the value of the corrisponding Keyboard Maestro variable.  C<$value> will
+be automatically stringified.  Returns an empty list.
 
 =cut
 
 sub km_set($$) { _ras <<"APPLESCRIPT"; return }
   tell application "Keyboard Maestro Engine"
-    set kmVarRef to make variable with properties { name:@{[ _escaped shift ]} }
+    set kmVarRef to make variable with properties { name:@{[ _varname shift ]} }
     set value of kmVarRef to @{[ _escaped shift ]}
     {}
   end tell
@@ -112,14 +121,14 @@ push @EXPORT_OK, 'km_set';
 
 =item km_get $varname
 
-Gets the current value of the corrisponding Keyboard Macro variable.  Returns
-C<undef> if no such variable exists.
+Gets the current value of the corrisponding Keyboard Maestro variable.  Returns
+an empty string if the variable does not exist.
 
 =cut
 
 sub km_get($) { return _ras <<"APPLESCRIPT" }
   tell application "Keyboard Maestro Engine"
-    set kmVarRef to make variable with properties { name:@{[ _escaped shift ]} }
+    set kmVarRef to make variable with properties { name:@{[ _varname shift ]} }
     get value of kmVarRef
   end tell
 APPLESCRIPT
@@ -127,13 +136,13 @@ push @EXPORT_OK, 'km_get';
 
 =item km_delete $varname
 
-Deletes the corrisponding Keyboard Macro variable
+Deletes the corrisponding Keyboard Maestro variable.  Returns an empty list.
 
 =cut
 
 sub km_delete($) { _ras <<"APPLESCRIPT"; return }
     tell application "Keyboard Maestro Engine"
-      delete variable @{[ _escaped shift ]}
+      delete variable @{[ _varname shift ]}
       {}
     end tell
 APPLESCRIPT
@@ -153,7 +162,7 @@ This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
 
 Keyboard Maestro itself is copyright Stairways Software Pty Ltd.  Neither Mark
-Fowler nor this Perl library is not associated with Keyboard Maestro or
+Fowler nor this Perl library is associated with Keyboard Maestro or
 Stairways Software Pty Ltd.
 
 =head1 BUGS

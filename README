@@ -26,22 +26,25 @@ DESCRIPTION
 
   Functions
     These functions can be imported, or you can use them fully qualified.
+    All functions throw exceptions if the AppleScript interface to Keyboard
+    Maestro returns an error.
 
     km_macro $macro_name
     km_macro $macro_uuid
-        Execute the named macro / macro with the passed uuid. Returns
-        nothing. Throws and exception if there's a problem.
+        Execute the named macro / macro with the passed uuid. Returns an
+        empty list.
 
     km_set $varname, $value
-        Sets the value of the corrisponding Keyboard Macro variable. $value
-        will be automatically stringified.
+        Sets the value of the corrisponding Keyboard Maestro variable.
+        $value will be automatically stringified. Returns an empty list.
 
     km_get $varname
-        Gets the current value of the corrisponding Keyboard Macro variable.
-        Returns "undef" if no such variable exists.
+        Gets the current value of the corrisponding Keyboard Maestro
+        variable. Returns an empty string if the variable does not exist.
 
     km_delete $varname
-        Deletes the corrisponding Keyboard Macro variable
+        Deletes the corrisponding Keyboard Maestro variable. Returns an
+        empty list.
 
 AUTHOR
     Written by Mark Fowler <mark@twoshortplanks.com>
@@ -53,8 +56,8 @@ COPYRIGHT
     under the same terms as Perl itself.
 
     Keyboard Maestro itself is copyright Stairways Software Pty Ltd. Neither
-    Mark Fowler nor this Perl library is not associated with Keyboard
-    Maestro or Stairways Software Pty Ltd.
+    Mark Fowler nor this Perl library is associated with Keyboard Maestro or
+    Stairways Software Pty Ltd.
 
 BUGS
     Bugs should be reported via this distribution's CPAN RT queue. This can
